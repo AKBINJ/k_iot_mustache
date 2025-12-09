@@ -29,9 +29,9 @@ public class DemoController {
     }
 
     //http://localhost:8080/update-form
-    @GetMapping("/update-form")
+    @GetMapping("/user/update-form")
     public String updateForm() {
-        return "board/update-form";
+        return "user/update-form";
     }
 
 
