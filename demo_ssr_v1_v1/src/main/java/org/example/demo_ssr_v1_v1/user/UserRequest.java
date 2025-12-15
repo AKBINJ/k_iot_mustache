@@ -5,7 +5,7 @@ import lombok.Data;
 public class UserRequest {
 
     @Data
-    public static class LonginDTO {
+    public static class LoginDTO {
         private String username;
         private String password;
 
