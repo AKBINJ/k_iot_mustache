@@ -23,7 +23,7 @@ public class BoardRequest {
     public static class UpdateDTO {
         private String title;
         private String content;
-        private String username;
+//        private String username;
 
         // 검증 메서드
         public void validate() {

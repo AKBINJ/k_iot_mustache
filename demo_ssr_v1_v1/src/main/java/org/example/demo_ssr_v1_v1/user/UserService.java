@@ -18,15 +18,19 @@ import org.springframework.transaction.annotation.Transactional;
  *      - 트랜잭션 관리
  *      - 여러 Repository를 조합하여 복잡한 비즈니스 로직을 처리
  */
-@Service // IoC 대산 @Component 의 특수한 형태
+@Service // IoC 대신 @Component 의 특수한 형태
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
 
+    // 객체 지향 개념 --> SOLID 원칙
+    // DIP - 추상화가 높은 것을 선언하는 것이 좋음
     private final UserRepository userRepository;
 
     @Transactional
     public User 회원가입(UserRequest.JoinDTO joinDTO) {
+
+//        joinDTO.validate();
 
         // 1. 사용자명 중복 체크
         if(userRepository.findByUsername(joinDTO.getUsername()).isPresent()) {
@@ -43,6 +47,10 @@ public class UserService {
         User userEntity = userRepository.findByUsernameAndPassword(loginDTO.getUsername(),
                         loginDTO.getPassword())
                 .orElse(null);
+
+//        UserResponse.LoginDto loginDto = new UserResponse.LoginDto();
+//        for (User user : userEntity )
+//            UserResponse.LoginDto dto = new UserResponse.LoginDto()
 
         if(userEntity == null) {
             throw new Exception400("사용자명 또는 비밀번호가 올바르지 않습니다.");
