@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1_v1.reply.ReplyResponse;
 import org.example.demo_ssr_v1_v1.reply.ReplyService;
 import org.example.demo_ssr_v1_v1.user.User;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -62,19 +64,20 @@ public class BoardController {
      * 게시글 목록 페이징 처리 기능 추가
      * @param model
      * @return
-     * // 예시:  /board/list?page=1&size=5
+     * // 예시:  /board/list?page=1&size=5&keyword="사용자입력값"
      */
     @GetMapping({"/board/list", "/"})
     public String boardList(Model model,
-                                 @RequestParam(defaultValue = "1") int page,
-                                 @RequestParam(defaultValue = "3") int size
+                            @RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "3") int size,
+                            @RequestParam(required = false) String keyword
     ) {
 
         int pageIndex = Math.max(0, page - 1);
-
-        BoardResponse.PageDTO boardPage = boardService.게시글목록조회(pageIndex, size);
+        BoardResponse.PageDTO boardPage = boardService.게시글목록조회(pageIndex, size, keyword);
 
         model.addAttribute("boardPage", boardPage);
+        model.addAttribute("keyword", keyword != null ? keyword: "");
 
         return "board/list";
     }

@@ -19,11 +19,11 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
      * WHERE r.board_id = ?
      * ORDER By r.created_at ASC
      */
-    @Query("SELECT r\n" +
-            "FROM Reply r\n" +
-            "JOIN FETCH r.board\n" +
-            "JOIN FETCH r.user\n" +
-            "WHERE r.board.id = :boardId\n" +
+    @Query("SELECT r " +
+            "FROM Reply r " +
+            "JOIN FETCH r.board " +
+            "JOIN FETCH r.user " +
+            "WHERE r.board.id = :boardId " +
             "ORDER BY r.createdAt ASC")
     List<Reply> findByBoardIdWithUser(@Param("boardId") Long boardId);
 

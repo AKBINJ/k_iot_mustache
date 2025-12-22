@@ -41,6 +41,18 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     countQuery = "SELECT COUNT(DISTINCT b) FROM Board b")
     Page<Board> findAllWithUserOrderByCreatedAtDesc(Pageable pageable);
 
+    /**
+     * 게시글 검색(제목 또는 내용, 페이징 포함)
+     */
+    @Query(value = "SELECT DISTINCT b FROM Board b JOIN FETCH b.user " +
+            "WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "   OR LOWER(b.content) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "ORDER BY b.createdAt DESC",
+            countQuery = "SELECT COUNT(DISTINCT b) FROM Board b " +
+                    "WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                    "   OR LOWER(b.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Board> findByTitleContainingOrContentContaining(@Param("keyword") String keyword, Pageable pageable);
+
     // 게시글 ID로 조회 (작성자 정보 포함 - JOIN FETCH 사용해야 함)
     @Query("SELECT b FROM Board b JOIN FETCH b.user WHERE b.id = :id")
     Optional<Board> findByIdWithUser(@Param("id") Long id);
