@@ -1,6 +1,7 @@
 package org.example.demo_ssr_v1_v1._core.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.demo_ssr_v1_v1._core.interceptor.AdminInterceptor;
 import org.example.demo_ssr_v1_v1._core.interceptor.LoginInterceptor;
 import org.example.demo_ssr_v1_v1._core.interceptor.SessionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // DI 처리
     private final LoginInterceptor loginInterceptor;
     private final SessionInterceptor sessionInterceptor;
+    private final AdminInterceptor adminInterceptor;
 
 //    public WebMvcConfig(LoginInterceptor loginInterceptor) {
 //        this.loginInterceptor = loginInterceptor;
@@ -41,11 +43,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
         //    -> 단, 특정 URL 은 제외시킴
         registry.addInterceptor(loginInterceptor)
                 // /** <-- 모든 URL 제외 대상이 됨. 일단 사용 안함
-                .addPathPatterns("/board/**", "/user/**", "/reply/**")
+                .addPathPatterns("/board/**", "/user/**", "/reply/**", "/admin/**")
                 .excludePathPatterns(
                         "/login",
                         "/join",
                         "/logout",
+                        "/user/kakao", // 카카오 리다이렉트 URI는 제외
                         "/board/list",
                         "/",
                         "/board/{id:\\d+}",
@@ -58,6 +61,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 // \\d+ 는 정규표현식으로 1개 이상의 숫자를 의미한다.
                 // /board/1, board/1234 <-- 허용
                 // /board/abc 같은 경우 매칭 되지 않음
+
+        registry.addInterceptor(adminInterceptor)
+                // 관리자 전용 페이지에만 적용 처리
+                .addPathPatterns("/admin/**");
     }
 
     /**

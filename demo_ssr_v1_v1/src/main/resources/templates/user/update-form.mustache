@@ -11,7 +11,7 @@
         <div class="text-center mb-4">
             {{#user.profileImage}}
             {{!어 src 경로가 /images/ 이네... 스프링에 등록한 리소드 핸들러가 동작 함 }}
-                <img src="/images/{{user.profileImage}}" alt="프로필사진" class="rounded-circle border"
+                <img src="{{user.profilePath}}" alt="프로필사진" class="rounded-circle border"
                      style="width: 200px;height: 200px; object-fit: cover">
             {{/user.profileImage}}
             {{^user.profileImage}}

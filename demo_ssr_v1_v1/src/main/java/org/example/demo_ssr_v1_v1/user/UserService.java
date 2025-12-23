@@ -68,7 +68,7 @@ public class UserService {
     public User 로그인(UserRequest.LoginDTO loginDTO) {
 
         // 사용자가 던진 값과 DB에 있는 사용자 이름과비밀번호를 확인해 주어야 한다.
-        User userEntity = userRepository.findByUsernameAndPassword(loginDTO.getUsername(),
+        User userEntity = userRepository.findByUsernameAndPasswordWithRoles(loginDTO.getUsername(),
                         loginDTO.getPassword())
                 .orElse(null);
 
@@ -185,5 +185,13 @@ public class UserService {
         userEntity.setProfileImage(null);
 
         return userEntity;
+    }
+
+    public User 사용자이름조회(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    public void 소셜회원가입(User user) {
+        userRepository.save(user);
     }
 }
