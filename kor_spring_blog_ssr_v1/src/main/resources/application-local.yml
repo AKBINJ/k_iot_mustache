@@ -15,11 +15,17 @@ logging:
     com.example: DEBUG   # 내 프로젝트는 DEBUG 이상 모두 출력
 
 spring:
+  # Mustache 템플릿 엔진 설정
+  #  mustache:
+  #    servlet:
+  # 세션과 요청 속성을 템플릿에서 사용 가능하게 함
+  #      expose-session-attributes: true
+  #      expose-request-attributes: true
   servlet:
     multipart:
       enabled: true           # 파일 업로드 활성화
       max-file-size: 10MB     # 개별 파일 최대 크기
-      max-request-size: 10MB  # 전체 요청 최대 크기
+      max-request-size: 10MB  # 전체 파일 최대 크기
 
   # 데이터베이스 연결 설정 (H2 인메모리 데이터베이스)
   datasource:
@@ -57,21 +63,21 @@ spring:
         # SQL 쿼리를 보기 좋게 포맷팅
         format_sql: true
         # N + 1 문제 해결: LAZY 로딩 시 연관된 엔티티를 배치로 한 번에 가져오기
-        # 게시글 목록 조회 시 만약(username 필요하다면)
-        # 배치로 묶어서 한 번에 가져옴 (IN 쿼리 사용 )
+        # 게시글 목록 조회 시 만약(username이 필요하다면)
+        # 배치로 묶어서 한 번에 가져옴 (IN 쿼리 사용)
         default_batch_fetch_size: 100
     # data.sql 파일을 Hibernate 초기화 이후에 실행
     defer-datasource-initialization: true
     # Open Session in View 를 false 로 설정
-    # - true (기본값) 뷰 렌더링 까지 세션 유지 (LAZY 로딩 가능)
+    # - true (기본값) 뷰 렌터링 까지 세션 유지 (LAZY 로딩 가능)
     # - false : 트랜잭션 종료 시 세션 종료(LAZY 로딩 불가, 명시적 조회 필요(트리거))
-    # - false 설정 시 Service 에서 필요한 데이터를 모두 조회 하고 DTO로 변환 해야 함
+    # - false 설정 시 Service 에서 필요한 데이터를 모두 조회 하고 DTOfh 변환해야 함
     open-in-view: false
-
 
 oauth:
   kakao:
     client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
 
 tenco:
   key: ${TENCO_KEY}

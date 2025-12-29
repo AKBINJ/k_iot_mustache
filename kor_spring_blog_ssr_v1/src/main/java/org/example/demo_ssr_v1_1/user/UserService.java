@@ -68,7 +68,7 @@ public class UserService {
         tokenParams.add("code", code);
 
         // TODO - env 파일에 옮겨야 함 시크릿 키 추가(노출 금지)
-        tokenParams.add("client_secret", "m2rBlEcfYhVX1wZWj7mXi9Uy1cCDNKHm");
+        tokenParams.add("client_secret", "tNeURrqeUfldpXG0zrvVgXwn54ieoSNX");
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams, tokenHeaders);
         ResponseEntity<UserResponse.OAuthToken> tokenResponse = restTemplate.exchange(
