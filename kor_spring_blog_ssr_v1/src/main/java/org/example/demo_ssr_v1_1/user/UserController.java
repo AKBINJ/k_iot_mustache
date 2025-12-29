@@ -1,0 +1,169 @@
+package org.example.demo_ssr_v1_1.user;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception401;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception403;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.UUID;
+
+/**
+ *  사용자 Controller (표현 계층) 
+ *  핵심 개념 : 
+ *  - HTTP 요청을 받아서 처리 
+ *  - 요청 데이터 검증 및 파마리터 바인딩
+ *  - Service 레이어에 비즈니스 로직을 위힘
+ *  - 응답 데이터를 View 에 전달 함
+ *
+ */
+
+@RequiredArgsConstructor
+@Controller
+public class UserController {
+
+    private final UserService userService;
+
+
+    @GetMapping("/user/kakao")
+    public String kakaoCallback(@RequestParam(name = "code") String code, HttpSession session) {
+        try {
+            // 서비스단에 비즈니즈 로직을 위임 처림
+            User user = userService.카카오소셜로그인(code);
+            // 세션 정보게 사용자 정보 저장
+            session.setAttribute("sessionUser", user);
+            return "redirect:/";
+        } catch (Exception e) {
+            System.out.println("소셜 로그인 실패 " + e.getMessage());
+            // alert 창 (에러메세지) --> 로그인 페이지로 이동 처리
+            throw new Exception401(e.getMessage());
+        }
+    }
+
+    // 프로필 이미지 삭제 하기
+    @PostMapping("/user/profile-image/delete")
+    public String deleteProfileImage(HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        User updateUser = userService.프로필이미지삭제(sessionUser.getId());
+        // 왜 user 다시 받을까? -- 세션 정보가 (즉 프로필이 삭제 되었기 때문에)
+        // 세션 정보 갱신 처리 해주기 위함이다.
+        session.setAttribute("sessionUser", updateUser); // 세션 정보 갱신
+
+        // 일반적으로 POST 요청이 오면 PRG 패턴으로 설계 됨
+        // POST -> Redirect 처리 ---> Get 요청
+        return "redirect:/user/detail";
+    }
+
+    // 마이페이지
+    // http://localhost:8080/user/detail
+    @GetMapping("/user/detail")
+    public String detail(Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        User user = userService.마이페이지(sessionUser.getId());
+
+        model.addAttribute("user", user);
+        return "user/detail";
+    }
+
+
+    // 회원 정보 수정 화면 요청
+    // http://localhost:8080/user/update
+    @GetMapping("/user/update")
+    public String updateForm(Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        User user = userService.회원정보수정화면(sessionUser.getId());
+        model.addAttribute("user", user);
+
+        return "user/update-form";
+    }
+
+
+    // 회원 정수 수정 기능 요청 - 더티 체킹
+    // http://localhost:8080/user/update
+    @PostMapping("/user/update")
+    public String updateProc(UserRequest.UpdateDTO updateDTO, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        try {
+            // 유효성 검사 (형식 검사)
+            updateDTO.validate();
+            User updateUser = userService.회원정보수정(updateDTO, sessionUser.getId());
+            // 회원 정보 수정은 - 세션 갱신해 주어야 한다.
+            session.setAttribute("sessionUser", updateUser);
+            return "redirect:/user/detail";
+        } catch (Exception e) {
+            return "user/update-form";
+        }
+    }
+
+
+
+    // 로그아웃 기능 요청
+    // http://localhost:8080/logout
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        // 세션 무효화
+        session.invalidate();
+        return "redirect:/";
+    }
+
+    // 로그인 화면 요청
+    // http://localhost:8080/login
+    @GetMapping("/login")
+    public String loginForm() {
+        return "user/login-form";
+    }
+
+
+    // http://localhost:8080/login
+    @PostMapping("/login")
+    public String loginProc(UserRequest.LoginDTO loginDTO, HttpSession session) {
+        try {
+            // 유효성 검사
+            loginDTO.validate();
+            User sessionUser =  userService.로그인(loginDTO);
+            session.setAttribute("sessionUser", sessionUser);
+            return "redirect:/";
+        } catch (Exception e) {
+            // 로그인 실패시 다시 로그인 화면으로 처리
+            return "user/login-form";
+        }
+    }
+
+
+
+
+    // 회원가입 화면 요청
+    // http://localhost:8080/join
+    @GetMapping("/join")
+    public String joinFrom() {
+        return "user/join-form";
+    }
+
+    // 회원가입 기능 요청
+    // http://localhost:8080/join
+    @PostMapping("/join")
+    public String joinProc(UserRequest.JoinDTO joinDTO) {
+        joinDTO.validate();
+        userService.회원가입(joinDTO);
+        return "redirect:/login";
+    }
+
+}
