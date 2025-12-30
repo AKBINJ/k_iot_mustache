@@ -2,6 +2,7 @@ package org.example.demo_ssr_v1_1.board;
 
 import lombok.Data;
 import org.example.demo_ssr_v1_1._core.utils.MyDateUtil;
+import org.example.demo_ssr_v1_1.purchase.Purchase;
 import org.example.demo_ssr_v1_1.user.User;
 import org.springframework.data.domain.Page;
 
@@ -48,9 +49,11 @@ public class BoardResponse {
         private String content;
         private Long userId;
         private String username;
+        private boolean isPurchased; // 로그인한 사용자가 이 게시글을 구매 했는지 확인 여부 (단, 작성자는 제외)
+        private boolean premium;
         private String createdAt;
 
-        public DetailDTO(Board board) {
+        public DetailDTO(Board board, Boolean isPurchased) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
@@ -59,6 +62,10 @@ public class BoardResponse {
                this.userId = board.getUser().getId();
                this.username = board.getUser().getUsername();
             }
+
+            this.isPurchased = isPurchased;
+            this.premium = board.getPremium();
+
             // 날짜 포맷팅
             if(board.getCreatedAt() != null) {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());

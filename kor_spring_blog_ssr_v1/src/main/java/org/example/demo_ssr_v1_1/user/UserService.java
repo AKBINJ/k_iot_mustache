@@ -34,6 +34,7 @@ public class UserService {
     private String tencoKey;
 
 
+    @Transactional
     public User 카카오소셜로그인(String code) {
         // 1. 인가 코드로 액세스 토큰 발급
         UserResponse.OAuthToken oAuthToken = 카카오액세스토큰발급(code);
@@ -110,7 +111,8 @@ public class UserService {
         return kakaoProfile;
     }
 
-    private User 카카오사용자생성또는조회(UserResponse.KakaoProfile kakaoProfile) {
+    @Transactional
+    public User 카카오사용자생성또는조회(UserResponse.KakaoProfile kakaoProfile) {
 
         String username = kakaoProfile.getProperties().getNickname()
                 + "_" + kakaoProfile.getId();
@@ -144,6 +146,11 @@ public class UserService {
         if (userRepository.findByUsername(joinDTO.getUsername()).isPresent()) {
             // isPresent -> 있으면 true 반환 , 없으면 false 반환
             throw new Exception400("이미 존재하는 사용자 이름입니다");
+        }
+
+        // 1.1 이메일 중복 체크
+        if(userRepository.findByEmail(joinDTO.getEmail()).isPresent()) {
+            throw new Exception400("이미 등록된 이메일 입니다.");
         }
 
         // User 엔티티에 저장할 때는 String 이어야 하고 null 값도 가질 수 있음
@@ -303,4 +310,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public User 포인트충전(Long userId, Integer amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+        user.chargePoint(amount);
+
+        return user;
+    }
 }
