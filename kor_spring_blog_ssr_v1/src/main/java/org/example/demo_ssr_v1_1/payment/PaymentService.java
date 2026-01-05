@@ -92,16 +92,15 @@ public class PaymentService {
     }
 
     private PaymentResponse.PortOnePaymentResponse.PaymentData 포트원결제조회(String impUid, String merchantUid) {
-
-        // 1. 엑세스 토큰 발급
+        // 1. 액세스 토큰 발급
         String accessToken = 포트원액세스토큰발급();
 
         // 2. 포트원 자원서버에 결제 정보 조회 요청
         try {
             RestTemplate restTemplate = new RestTemplate();
-            // 포트원 단건 조회 API (GET 방식과 헤더에 Bearer + "공백" )
+            // 포트원 단건 조회 API ( GET 방식와 헤더에 Bearer + "공백" asdfasdfqedf)
             HttpHeaders headers = new HttpHeaders();
-            headers.setBasicAuth(accessToken);
+            headers.setBearerAuth(accessToken);
             HttpEntity<Void> request = new HttpEntity<>(headers);
 
             ResponseEntity<PaymentResponse.PortOnePaymentResponse> response = restTemplate.exchange(
@@ -111,17 +110,17 @@ public class PaymentService {
                     PaymentResponse.PortOnePaymentResponse.class
             );
 
-            System.out.println("자원 서버 - response : " + response);
+            // 3. 응답 데이터 추출
             PaymentResponse.PortOnePaymentResponse.PaymentData data =
                     response.getBody().getResponse();
 
             if(data == null) {
-                throw new Exception400("결제 정보를 찾을 수 없습니다.");
+                throw new Exception400("결제 정보를 찾을 수 없습니다");
             }
 
-            // 4. 데이터 무결성 검증 **
+            // 4. ** 데이터 무결성 검증 **
             if(!"paid".equals(data.getStatus())) {
-                throw new Exception400("결제가 완료되지 않았습니다.");
+                throw new Exception400("결제가 완료되지 않았습니다");
             }
             if(!merchantUid.equals(data.getMerchantUid())) {
                 throw new Exception400("주문번호가 일치하지 않습니다");
@@ -130,7 +129,7 @@ public class PaymentService {
             return data;
 
         } catch (Exception e) {
-            throw new Exception400("포트원 인증실패: 관리자 설정을 확인하세요");
+            throw new RuntimeException(e);
         }
 
     }
@@ -160,21 +159,11 @@ public class PaymentService {
                     request,
                     PaymentResponse.PortOneTokenResponse.class
             );
-
-//            // 응답 받은 엑세스 토큰 리턴
-//            System.out.println("액세스 토큰 확인");
-//            System.out.println(response.getBody().getResponse().getAccessToken());
-//            System.out.println("response : " + response);
-
+            // 응답 받은 엑세트 토큰 리턴
             return response.getBody().getResponse().getAccessToken();
-
         } catch (Exception e) {
             throw new Exception400("포트원 인증실패: 관리자 설정을 확인하세요");
         }
-
-
     }
 
 }
-
-
