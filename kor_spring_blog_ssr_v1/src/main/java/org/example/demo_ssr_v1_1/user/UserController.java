@@ -1,28 +1,17 @@
 package org.example.demo_ssr_v1_1.user;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1_1._core.errors.exception.Exception401;
-import org.example.demo_ssr_v1_1._core.errors.exception.Exception403;
-import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.example.demo_ssr_v1_1.purchase.PurchaseResponse;
+import org.example.demo_ssr_v1_1.purchase.PurchaseService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.UUID;
+import java.util.List;
 
 /**
  *  사용자 Controller (표현 계층) 
@@ -39,6 +28,18 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final PurchaseService purchaseService;
+
+    // /user/purchase/list
+    @GetMapping("/user/purchase/list")
+    public String purchaseList(Model model, HttpSession session) {
+
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        List<PurchaseResponse.ListDTO> purchaseList = purchaseService.구매내역조회(sessionUser.getId());
+
+        model.addAttribute("purchaseList", purchaseList);
+        return "user/purchase-list";
+    }
 
     // /user/point/charge
     @GetMapping("/user/point/charge")
