@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -166,4 +167,11 @@ public class PaymentService {
         }
     }
 
+    public List<PaymentResponse.ListDTO> 결재내역조회(Long userId) {
+        List<Payment> paymentList = paymentRepository.findByUserId(userId);
+
+        return paymentList.stream()
+                .map(PaymentResponse.ListDTO::new)
+                .toList();
+    }
 }
