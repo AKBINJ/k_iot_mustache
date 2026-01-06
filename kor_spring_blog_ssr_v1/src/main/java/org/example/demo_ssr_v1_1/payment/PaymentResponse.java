@@ -3,6 +3,9 @@ package org.example.demo_ssr_v1_1.payment;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
+import org.example.demo_ssr_v1_1._core.utils.MyDateUtil;
+
+import java.sql.Timestamp;
 
 public class PaymentResponse {
 
@@ -65,6 +68,30 @@ public class PaymentResponse {
             private String status;
             private Long paidAt;
         }
+    }
+
+    @Data
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class ListDTO {
+        private Long id;
+        private String impUid;
+        private String merchantUid;
+        private Integer amount;
+        private String status;
+        private String timestamp;
+
+        public ListDTO(Payment payment) {
+            this.id = payment.getId();
+            this.impUid = payment.getImpUid();
+            this.merchantUid = payment.getMerchantUid();
+            this.amount = payment.getAmount();
+            if(payment.getStatus().contains("paid")) {
+                this.status = "결제완료";
+            }
+//            this.status = payment.getStatus();
+            this.timestamp = MyDateUtil.timestampFormat(payment.getTimestamp());
+        }
+
     }
 
 }
