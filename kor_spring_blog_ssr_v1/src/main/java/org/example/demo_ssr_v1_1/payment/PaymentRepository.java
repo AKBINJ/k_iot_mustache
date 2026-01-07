@@ -9,7 +9,13 @@ import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    List<Payment> findByUserId(@Param("userId") Long userId);
+    // 사용자별 결제 내역 조회 (최신순)
+    @Query("""
+            SELECT p FROM Payment p
+            WHERE p.user.id = :userId
+            ORDER BY p.timestamp DESC
+    """)
+    List<Payment> findAllByUserId(@Param("userId") Long userId);
 
     // 포트원 결제 번호로 Payment 정보 조회
     Optional<Payment> findByImpUid(String impUid);

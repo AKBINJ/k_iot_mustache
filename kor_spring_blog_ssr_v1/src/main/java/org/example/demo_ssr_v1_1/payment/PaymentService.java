@@ -3,6 +3,8 @@ package org.example.demo_ssr_v1_1.payment;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1_1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
+import org.example.demo_ssr_v1_1.refund.RefundRequest;
+import org.example.demo_ssr_v1_1.refund.RefundRequestRepository;
 import org.example.demo_ssr_v1_1.user.User;
 import org.example.demo_ssr_v1_1.user.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -23,6 +22,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final RefundRequestRepository refundRequestRepository;
 
     @Value("${portone.imp-key}")
     private String impKey;
@@ -167,11 +167,49 @@ public class PaymentService {
         }
     }
 
-    public List<PaymentResponse.ListDTO> 결재내역조회(Long userId) {
-        List<Payment> paymentList = paymentRepository.findByUserId(userId);
+    // 결제 내역 목록 조회
 
+    // 환불 요청 상태를 확인하여 isRefundable 를 결정 해야 한다.
+    // - 결제 상태가 paid -> 환불 요청이 없거나 또는 거절된 상태
+    // - 결제 상태가 paid -> 환불 요청 대기 상태 중 이거나 승인된 상태
+    // - 결제 상태가 cancelled 인 상태인 경우 (이미 관리자에서 거절 했음. 환불 불가)
+    public List<PaymentResponse.ListDTO> 결제내역조회(Long userId) {
+        List<Payment> paymentList = paymentRepository.findAllByUserId(userId);
+        // [0, 1, 2, 3]
         return paymentList.stream()
-                .map(PaymentResponse.ListDTO::new)
-                .toList();
+                .map(payment -> {
+                    // 환불 요청 조회
+                    // 결제 PK 값으로 환불 테이블에 이력이 있는지 없는지 조회
+                    Optional<RefundRequest> refundRequestOpt
+                            = refundRequestRepository.findByPaymentId(payment.getId());
+
+                    // 환불 요청이 있는 경우 상태 확인
+                    // 요청 있으면 true --> 화면에는 환불 요청 버튼 보이면 안됨.
+                    boolean hasRefundRequest = refundRequestOpt.isPresent();
+                    boolean isRefundable = false;
+
+                    if ("paid".equals(payment.getStatus())) {
+                        // 1. 결제 완료인 상태다.
+                        if (!hasRefundRequest) {
+                            // 환불 요청이 없는 상태이기 때문에 환불 요청 가능 상태
+                            isRefundable = true;
+                        } else {
+                            // 환불 요청 대기 상태 --> 원래 false임 (즉 화면에 버튼 안 보임)
+                            RefundRequest refundRequest = refundRequestOpt.get();
+                            // 관리자가 환불 거절 했지만 다시 요청하게 사용자한테 너그러움 준다면
+                            if (refundRequest.isRejected()) {
+                                isRefundable = true;
+                            } else {
+                                // 대기중 / 환불 완료
+                                isRefundable = false;
+                            }
+                        }
+                    } else {
+                        // 환불 완료 상태 (돈 내어 줌)
+                        isRefundable = false;
+                    }
+                    return new PaymentResponse.ListDTO(payment, isRefundable);
+                }).toList();
+
     }
 }

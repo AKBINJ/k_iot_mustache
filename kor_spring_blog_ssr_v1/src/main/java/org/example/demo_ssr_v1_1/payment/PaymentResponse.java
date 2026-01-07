@@ -70,28 +70,43 @@ public class PaymentResponse {
         }
     }
 
+
+
+
+    // 결제 내역 리스트 응답 DTO
     @Data
-    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class ListDTO {
         private Long id;
-        private String impUid;
-        private String merchantUid;
+        private String impUid;  // 포트원 결제 고유 번호
+        private String merchantUid; // 주문번호
         private Integer amount;
-        private String status;
         private String timestamp;
+        // 화면에 보여질 상태 표시명
+        private String status;
+        private String statusDisplay;
 
-        public ListDTO(Payment payment) {
+        private Boolean isRefundable; // 환불 가능 여부 (화면에 표시 여부)
+
+        public ListDTO(Payment payment, Boolean isRefundable) {
             this.id = payment.getId();
             this.impUid = payment.getImpUid();
             this.merchantUid = payment.getMerchantUid();
             this.amount = payment.getAmount();
-            if(payment.getStatus().contains("paid")) {
-                this.status = "결제완료";
-            }
-//            this.status = payment.getStatus();
-            this.timestamp = MyDateUtil.timestampFormat(payment.getTimestamp());
-        }
+            this.status = payment.getStatus();
+            this.isRefundable = isRefundable != null ? isRefundable : false;
 
+            // 상태 표시명 변환
+            if ("paid".equals(payment.getStatus())) {
+                this.statusDisplay = "결제완료";
+            } else {
+                this.statusDisplay = "환불완료";
+            }
+
+            // 날자 포멧팅
+            if (payment.getTimestamp() != null) {
+                this.timestamp = MyDateUtil.timestampFormat(payment.getTimestamp());
+            }
+        }
     }
 
 }

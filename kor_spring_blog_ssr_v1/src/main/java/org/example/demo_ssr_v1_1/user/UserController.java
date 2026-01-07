@@ -34,11 +34,12 @@ public class UserController {
     private final PaymentService paymentService;
 
     // /user/payment/list
-    @GetMapping("user/payment/list")
+    @GetMapping("/user/payment/list")
     public String paymentList(Model model, HttpSession session) {
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        List<PaymentResponse.ListDTO> paymentList = paymentService.결재내역조회(sessionUser.getId());
 
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        List<PaymentResponse.ListDTO> paymentList
+                = paymentService.결제내역조회(sessionUser.getId());
         model.addAttribute("paymentList", paymentList);
         return "user/payment-list";
     }

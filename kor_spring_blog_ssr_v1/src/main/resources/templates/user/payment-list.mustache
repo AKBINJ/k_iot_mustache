@@ -19,21 +19,26 @@
                                 결제 #{{id}}
                             </h5>
                             <p class="text-muted mb-2">
-                                <i class="fa-solid fa-clipboard-list"></i>주문번호: {{merchantUid}}
+                                <i class="fa-solid fa-clipboard-list"></i> 주문번호: {{merchantUid}}
                             </p>
                             <p class="text-muted mb-2">
-                                <i class="fa-solid fa-key"></i>결제번호: {{impUid}}
+                                <i class="fa-solid fa-key"></i> 결제번호: {{impUid}}
                             </p>
                             <p class="text-muted mb-2">
-                                <i class="fa-regular fa-rectangle-list"></i>결제일: {{timestamp}}
+                                <i class="fa-regular fa-rectangle-list"></i> 결제일: {{timestamp}}
                             </p>
                             <p class="text-muted mb-2">
-                                <i class="fa-solid fa-info"></i>상태: <span class="badge bg-success fs-6"> {{status}} </span>
+                                <i class="fa-solid fa-info"></i> 상태: <span class="badge bg-success fs-6"> {{statusDisplay}} </span>
                             </p>
                         </div>
                         <div class="text-end">
                             <span class="badge bg-primary fs-6">+{{amount}}P</span>
+                            {{#isRefundable}}
+                                <a href="/refund/request/1" class="btn btn-outline-danger btn-sm">환불하기</a>
+                            {{/isRefundable}}
                         </div>
+
+
                     </div>
                 </div>
             </div>
