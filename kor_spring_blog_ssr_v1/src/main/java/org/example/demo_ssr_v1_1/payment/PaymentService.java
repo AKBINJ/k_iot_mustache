@@ -3,7 +3,7 @@ package org.example.demo_ssr_v1_1.payment;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1_1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
-import org.example.demo_ssr_v1_1.refund.RefundRequest;
+import org.example.demo_ssr_v1_1.refund.Refund;
 import org.example.demo_ssr_v1_1.refund.RefundRequestRepository;
 import org.example.demo_ssr_v1_1.user.User;
 import org.example.demo_ssr_v1_1.user.UserRepository;
@@ -180,7 +180,7 @@ public class PaymentService {
                 .map(payment -> {
                     // 환불 요청 조회
                     // 결제 PK 값으로 환불 테이블에 이력이 있는지 없는지 조회
-                    Optional<RefundRequest> refundRequestOpt
+                    Optional<Refund> refundRequestOpt
                             = refundRequestRepository.findByPaymentId(payment.getId());
 
                     // 환불 요청이 있는 경우 상태 확인
@@ -195,7 +195,7 @@ public class PaymentService {
                             isRefundable = true;
                         } else {
                             // 환불 요청 대기 상태 --> 원래 false임 (즉 화면에 버튼 안 보임)
-                            RefundRequest refundRequest = refundRequestOpt.get();
+                            Refund refundRequest = refundRequestOpt.get();
                             // 관리자가 환불 거절 했지만 다시 요청하게 사용자한테 너그러움 준다면
                             if (refundRequest.isRejected()) {
                                 isRefundable = true;

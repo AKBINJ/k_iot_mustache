@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Table(name = "refund_request_tb")
 @Entity
-public class RefundRequest {
+public class Refund {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,7 +60,7 @@ public class RefundRequest {
 
     // 사용자가 먼저 환불 요청에 의해서 -> row 생성되기 때문(reason <- 사용자 환불 사유)
     @Builder
-    public RefundRequest(User user, Payment payment, String reason) {
+    public Refund(User user, Payment payment, String reason) {
         this.user = user;
         this.payment = payment;
         this.reason = reason;

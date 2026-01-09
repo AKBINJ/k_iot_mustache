@@ -70,9 +70,6 @@ public class PaymentResponse {
         }
     }
 
-
-
-
     // 결제 내역 리스트 응답 DTO
     @Data
     public static class ListDTO {
@@ -106,6 +103,11 @@ public class PaymentResponse {
             if (payment.getTimestamp() != null) {
                 this.timestamp = MyDateUtil.timestampFormat(payment.getTimestamp());
             }
+        }
+
+        public ListDTO(Payment payment) {
+            //  [],  *(true, false)
+            this(payment, "paid".equals(payment.getStatus()));
         }
     }
 

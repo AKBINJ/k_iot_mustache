@@ -7,19 +7,19 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface RefundRequestRepository extends JpaRepository<RefundRequest, Long> {
+public interface RefundRequestRepository extends JpaRepository<Refund, Long> {
 
     // 사용자 ID로 환불 요청 목록 조회 (최신순)
     // N + 1 방지를 위해서 한번에 JOIN FETCH 를 사용해서 User 를 가져올 예정
     @Query("""
-        SELECT r FROM RefundRequest r
+        SELECT r FROM Refund r
         JOIN FETCH r.payment p
         JOIN FETCH p.user u
         WHERE r.user.id = :userId
         ORDER BY r.createdAt DESC
     """)
-    List<RefundRequest> findAllByUserId(@Param("userId") Long userId);
+    List<Refund> findAllByUserId(@Param("userId") Long userId);
 
     // 결제 ID로 환불 요청 조회 여부 확인
-    Optional<RefundRequest> findByPaymentId(Long paymentId);
+    Optional<Refund> findByPaymentId(Long paymentId);
 }
