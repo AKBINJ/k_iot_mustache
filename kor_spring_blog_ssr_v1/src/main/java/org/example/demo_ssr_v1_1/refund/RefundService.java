@@ -72,4 +72,11 @@ public class RefundService {
                 .map(RefundResponse.ListDTO::new)
                 .toList();
     }
+
+    public List<RefundResponse.AdminListDTO> 관리자환불요청목록조회() {
+        List<Refund> refundRequestList = refundRequestRepository.findAllWithUserAndPayment();
+        return refundRequestList.stream()
+                .map(RefundResponse.AdminListDTO::new)
+                .toList();
+    }
 }
